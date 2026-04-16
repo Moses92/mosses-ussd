@@ -1,6 +1,3 @@
-app.get('/', (req, res) => {
-  res.send('MOSSES USSD server is running 🚀');
-});
 const express = require('express');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
@@ -34,6 +31,11 @@ function getLang(text) {
   return parts[0] === '2' ? 'en' : 'sw';
 }
 
+// ===== ROOT ROUTE =====
+app.get('/', (req, res) => {
+  res.send('MOSSES USSD server is running 🚀');
+});
+
 // ===== SAVE FUNCTIONS =====
 async function saveRequest(data) {
   await db.collection('spores').add({
@@ -62,28 +64,22 @@ function mainMenu(lang) {
   );
 }
 
-// ===== ROUTE =====
+// ===== USSD ROUTE =====
 app.post('/ussd', async (req, res) => {
   const { phoneNumber, text = '' } = req.body;
 
   let response = '';
 
   try {
-    // STEP 0: LANGUAGE SELECT
     if (text === '') {
       response = con(`Karibu MOSSES
 Choose language / Chagua lugha
 1. Kiswahili
 2. English`);
-    }
-
-    // STEP 1: LANGUAGE CHOSEN
-    else if (text === '1' || text === '2') {
+    } else if (text === '1' || text === '2') {
       const lang = text === '2' ? 'en' : 'sw';
       response = mainMenu(lang);
-    }
-
-    else {
+    } else {
       const parts = text.split('*');
       const lang = getLang(text);
 
@@ -93,9 +89,7 @@ Choose language / Chagua lugha
           response = con(
             t(lang, 'Andika huduma unayohitaji:', 'Describe the service:')
           );
-        }
-
-        else if (parts.length === 3) {
+        } else if (parts.length === 3) {
           response = con(
             t(
               lang,
@@ -109,9 +103,7 @@ ${parts[2]}
 2. Cancel`
             )
           );
-        }
-
-        else if (parts.length === 4) {
+        } else if (parts.length === 4) {
           if (parts[3] === '1') {
             await saveRequest({
               customerName: phoneNumber,
@@ -121,16 +113,10 @@ ${parts[2]}
             });
 
             response = end(
-              t(
-                lang,
-                'Ombi limepokelewa',
-                'Request received successfully'
-              )
+              t(lang, 'Ombi limepokelewa', 'Request received successfully')
             );
           } else {
-            response = end(
-              t(lang, 'Umeghairi', 'Cancelled')
-            );
+            response = end(t(lang, 'Umeghairi', 'Cancelled'));
           }
         }
       }
@@ -149,9 +135,7 @@ ${parts[2]}
 2. Parcel`
             )
           );
-        }
-
-        else if (parts[2] === '1') {
+        } else if (parts[2] === '1') {
           if (parts.length === 3) {
             response = con(t(lang, 'Weka unapoanzia:', 'Pickup location:'));
           } else if (parts.length === 4) {
@@ -197,9 +181,7 @@ ${parts[3]} → ${parts[4]}
           response = con(
             t(lang, 'Andika errand:', 'Describe errand:')
           );
-        }
-
-        else if (parts.length === 3) {
+        } else if (parts.length === 3) {
           response = con(
             t(
               lang,
@@ -213,9 +195,7 @@ ${parts[2]}
 2. Cancel`
             )
           );
-        }
-
-        else if (parts.length === 4) {
+        } else if (parts.length === 4) {
           if (parts[3] === '1') {
             await saveRequest({
               customerName: phoneNumber,
@@ -231,9 +211,7 @@ ${parts[2]}
             response = end(t(lang, 'Umeghairi', 'Cancelled'));
           }
         }
-      }
-
-      else {
+      } else {
         response = end(
           t(lang, 'Chaguo si sahihi', 'Invalid option')
         );
