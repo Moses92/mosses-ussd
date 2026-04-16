@@ -10,45 +10,29 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({
-    ok: true,
-    message: 'MOSSES USSD health check OK',
-  });
+  res.json({ ok: true, message: 'health ok' });
 });
 
-app.post('/ussd', async (req, res) => {
+app.all('/ussd', (req, res) => {
+  console.log('USSD HIT METHOD:', req.method);
   console.log('USSD BODY:', req.body);
+  console.log('USSD QUERY:', req.query);
 
-  const text = (req.body.text || '').trim();
+  const text = (req.body?.text || req.query?.text || '').trim();
 
   let response = '';
 
-  try {
-    if (text === '') {
-      response = `CON Karibu MOSSES
-Choose language / Chagua lugha
-1. Kiswahili
-2. English`;
-    } else if (text === '1') {
-      response = `CON Karibu MOSSES
+  if (text === '') {
+    response = `CON Karibu MOSSES
 1. Omba Huduma
 2. Omba Usafirishaji
 3. Omba Errand`;
-    } else if (text === '2') {
-      response = `CON Welcome to MOSSES
-1. Request Service
-2. Request Transport
-3. Request Errand`;
-    } else {
-      response = 'END Test OK';
-    }
-  } catch (e) {
-    console.error('USSD ERROR:', e);
-    response = 'END System error';
+  } else {
+    response = 'END Test OK';
   }
 
   res.set('Content-Type', 'text/plain');
-  res.send(response);
+  res.status(200).send(response);
 });
 
 const PORT = process.env.PORT || 3000;
