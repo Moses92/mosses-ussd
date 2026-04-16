@@ -1,3 +1,6 @@
+app.get('/', (req, res) => {
+  res.send('MOSSES USSD server is running 🚀');
+});
 const express = require('express');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
